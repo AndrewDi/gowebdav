@@ -1,0 +1,8 @@
+# WebDAV客户端配置文件
+endpoint: http://example.com:8080
+username: your_username
+password: your_password
+httpProxy: "http://proxy.example.com:8080"
+httpsProxy: "http://proxy.example.com:8443"
+proxyUsername: ""
+proxyPassword: ""
