@@ -1,0 +1,15 @@
+# 忽略编译产物
+build/
+
+# 忽略 IDE 相关文件
+.trae/
+
+# 忽略配置文件
+config.yaml
+
+# 忽略临时文件
+*.tmp
+*.temp
+
+# 忽略日志文件
+*.log
