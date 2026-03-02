@@ -2,6 +2,36 @@
 
 WebDAV client library for Go with command-line interface.
 
+## 中文版本
+
+### 项目简介
+
+gowebdav 是一个基于 Go 语言开发的 WebDAV 客户端库，提供了完整的 WebDAV 协议实现，同时包含一个功能强大的命令行工具 `webdav-cli`。
+
+### 客户端功能
+
+- **目录浏览**：支持列出目录内容，可按时间、名称排序，支持正则匹配
+- **文件传输**：支持上传和下载文件，带有进度显示
+- **目录操作**：支持创建和删除目录
+- **文件操作**：支持删除和查看文件内容
+- **远程编辑**：支持使用 vim 编辑远程文件，文件不存在时自动创建
+- **代理支持**：支持 HTTP/HTTPS 代理，可配置代理认证
+- **配置文件**：支持使用配置文件存储服务器和代理设置
+
+### 安装
+
+```bash
+go get github.com/AndrewDi/gowebdav
+```
+
+### 快速开始
+
+1. **创建配置文件**：在 `~/.webdav/config.yaml` 中添加服务器和代理设置
+2. **列出目录内容**：`webdav-cli ls /`
+3. **上传文件**：`webdav-cli put local.txt /remote.txt`
+4. **下载文件**：`webdav-cli get /remote.txt local.txt`
+5. **编辑文件**：`webdav-cli vim /remote.txt`
+
 ## Installation
 
 ```bash
