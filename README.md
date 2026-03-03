@@ -216,6 +216,53 @@ webdav-cli --endpoint http://example.com:8080 --username your_username --passwor
    webdav-cli --endpoint http://example.com:8080 --username your_username --password your_password vim /file.txt
    ```
 
+9. **console** - Start interactive console mode
+   ```bash
+   # Basic usage
+   webdav-cli console
+   
+   # With custom config
+   webdav-cli console --config /path/to/config.yaml
+   
+   # With command-line parameters
+   webdav-cli console --endpoint http://example.com:8080 --username your_username --password your_password
+   ```
+
+#### Interactive Console Mode
+
+The console mode provides an interactive shell for running WebDAV commands:
+
+```bash
+webdav-cli console
+```
+
+**Features:**
+- **Tab Completion**: Press Tab to auto-complete commands and file paths
+- **Directory Navigation**: Use `cd` and `pwd` to navigate directories
+- **Command History**: Use up/down arrows to navigate command history
+
+**Built-in Commands:**
+- `help` - Show available commands
+- `exit` / `quit` - Exit the console
+- `clear` - Clear the screen
+- `cd [path]` - Change directory (cd, cd .., cd /path)
+- `pwd` - Print working directory
+
+**Example:**
+```
+$ webdav-cli console --config ~/.webdav.yaml
+Welcome to WebDAV CLI Console!
+Type 'help' for available commands, 'exit' or 'quit' to exit.
+Use Tab for auto-completion.
+
+webdav> ls
+webdav> cd /documents
+webdav:/documents> ls
+webdav:/documents> pwd
+/documents
+webdav:/documents> exit
+```
+
 ## Library Usage
 
 ### Basic Example

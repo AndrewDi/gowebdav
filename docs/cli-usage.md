@@ -105,6 +105,48 @@ export http_proxy=http://127.0.0.0:11111
 webdav-cli -endpoint http://192.168.1.5:5005 -username webcli -password @Andrewtomy9 -command rm -remote /document.txt
 ```
 
+### 6. console - 交互式控制台模式
+
+**功能**：启动交互式控制台，支持连续执行多个命令。
+
+**参数**：支持所有全局参数（--config, --endpoint, --username, --password 等）
+
+**示例**：
+```bash
+# 使用配置文件启动
+webdav-cli console --config ~/.webdav.yaml
+
+# 使用命令行参数启动
+webdav-cli console --endpoint http://192.168.1.5:5005 --username webcli --password @Andrewtomy9
+```
+
+**控制台内置命令**：
+- `help` - 显示可用命令
+- `exit` / `quit` - 退出控制台
+- `clear` - 清空屏幕
+- `cd [路径]` - 切换目录（cd, cd .., cd /path）
+- `pwd` - 显示当前目录
+
+**使用示例**：
+```
+$ webdav-cli console --config ~/.webdav.yaml
+Welcome to WebDAV CLI Console!
+Type 'help' for available commands, 'exit' or 'quit' to exit.
+Use Tab for auto-completion.
+
+webdav> ls
+webdav> cd /documents
+webdav:/documents> ls
+webdav:/documents> pwd
+/documents
+webdav:/documents> exit
+```
+
+**功能特点**：
+- **Tab 补全**：按 Tab 键自动补全命令和文件路径
+- **目录导航**：使用 cd 和 pwd 命令切换目录
+- **命令历史**：使用上下箭头键浏览命令历史
+
 ## 完整示例
 
 ### 场景：上传文件到服务器并验证

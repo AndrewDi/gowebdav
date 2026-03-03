@@ -105,6 +105,48 @@ export http_proxy=http://127.0.0.0:11111
 webdav-cli -endpoint http://192.168.1.5:5005 -username webcli -password @Andrewtomy9 -command rm -remote /document.txt
 ```
 
+### 6. console - Interactive Console Mode
+
+**Function**: Start an interactive console for running multiple WebDAV commands.
+
+**Parameters**: Supports all global options (--config, --endpoint, --username, --password, etc.)
+
+**Example**:
+```bash
+# Start with config file
+webdav-cli console --config ~/.webdav.yaml
+
+# Start with command-line parameters
+webdav-cli console --endpoint http://192.168.1.5:5005 --username webcli --password @Andrewtomy9
+```
+
+**Console Built-in Commands**:
+- `help` - Show available commands
+- `exit` / `quit` - Exit the console
+- `clear` - Clear the screen
+- `cd [path]` - Change directory (cd, cd .., cd /path)
+- `pwd` - Print working directory
+
+**Usage Example**:
+```
+$ webdav-cli console --config ~/.webdav.yaml
+Welcome to WebDAV CLI Console!
+Type 'help' for available commands, 'exit' or 'quit' to exit.
+Use Tab for auto-completion.
+
+webdav> ls
+webdav> cd /documents
+webdav:/documents> ls
+webdav:/documents> pwd
+/documents
+webdav:/documents> exit
+```
+
+**Features**:
+- **Tab Completion**: Press Tab to auto-complete commands and file paths
+- **Directory Navigation**: Use cd and pwd commands to navigate directories
+- **Command History**: Use up/down arrow keys to browse command history
+
 ## Complete Example
 
 ### Scenario: Upload file to server and verify
