@@ -3,6 +3,7 @@ module github.com/AndrewDi/gowebdav
 go 1.25.0
 
 require (
+	github.com/chzyer/readline v1.5.1
 	github.com/spf13/cobra v1.8.0
 	gopkg.in/yaml.v3 v3.0.1
 )

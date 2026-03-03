@@ -13,7 +13,7 @@ $(BIN_DIR):
 .PHONY: build
 build:
 	@echo "Building webdav-cli..."
-	@go build -o $(BIN_DIR)/webdav-cli $(CMD_DIR)/main.go
+	@go build -o $(BIN_DIR)/webdav-cli $(CMD_DIR)
 	@echo "Build completed. Binary is available at $(BIN_DIR)/webdav-cli"
 
 # 清理构建产物
