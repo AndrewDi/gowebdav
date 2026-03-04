@@ -509,10 +509,9 @@ func executeCat(ctx context.Context, client *gowebdav.Client, remotePath string)
 		log.Fatalf("❌ Failed to read file: %v", err)
 	}
 
-	ext := strings.ToLower(filepath.Ext(remotePath))
-
-	if ext == ".json" {
-		var data interface{}
+	switch strings.ToLower(filepath.Ext(remotePath)) {
+	case ".json":
+		var data any
 		if err := json.Unmarshal(content, &data); err == nil {
 			formatted, err := json.MarshalIndent(data, "", "  ")
 			if err == nil {
@@ -520,8 +519,8 @@ func executeCat(ctx context.Context, client *gowebdav.Client, remotePath string)
 				return
 			}
 		}
-	} else if ext == ".yaml" || ext == ".yml" {
-		var data interface{}
+	case ".yaml", ".yml":
+		var data any
 		if err := yaml.Unmarshal(content, &data); err == nil {
 			formatted, err := yaml.Marshal(data)
 			if err == nil {
