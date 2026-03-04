@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -16,6 +18,7 @@ import (
 	"github.com/AndrewDi/gowebdav/config"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 // 全局变量
@@ -42,23 +45,19 @@ var rootCmd = &cobra.Command{
 	Short: "WebDAV client",
 	Long:  "A command-line client for WebDAV servers",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		// 读取配置文件
 		var cfg *config.Config
 		var err error
 
-		// 确定配置文件路径
 		configFile := configPath
 		if configFile == "" {
 			configFile = config.GetDefaultConfigPath()
 		}
 
-		// 加载配置文件
 		cfg, err = config.LoadConfig(configFile)
 		if err != nil {
 			log.Fatalf("Failed to load config file: %v", err)
 		}
 
-		// 使用配置文件中的值，命令行参数优先级更高
 		if endpoint == "" {
 			endpoint = cfg.Endpoint
 		}
@@ -81,24 +80,20 @@ var rootCmd = &cobra.Command{
 			proxyPassword = cfg.ProxyPassword
 		}
 
-		// 验证必要参数
 		if endpoint == "" {
 			log.Fatal("endpoint is required")
 		}
 
-		// 创建WebDAV客户端
 		var errClient error
 		client, errClient = gowebdav.NewClient(endpoint, username, password)
 		if errClient != nil {
 			log.Fatalf("Failed to create client: %v", errClient)
 		}
 
-		// 设置HTTP客户端超时
 		client.SetHTTPClient(&http.Client{
 			Timeout: 30 * time.Second,
 		})
 
-		// 设置代理配置
 		if httpProxy != "" || httpsProxy != "" {
 			proxyConfig := gowebdav.ProxyConfig{
 				HTTP:     httpProxy,
@@ -124,32 +119,24 @@ var lsCmd = &cobra.Command{
 		remotePath := "/"
 		pattern := ""
 		if len(args) > 0 {
-			// 检查是否有两个参数
 			if len(args) > 1 {
-				// 第一个参数是路径，第二个是模式
 				remotePath = args[0]
 				pattern = args[1]
 			} else {
-				// 检查参数是否包含通配符
 				if strings.ContainsAny(args[0], "*?[]") {
-					// 如果参数包含通配符，并且以/开头，那么它是一个带模式的路径
 					if strings.HasPrefix(args[0], "/") {
-						// 提取路径部分和模式部分
 						lastSlash := strings.LastIndex(args[0], "/")
 						if lastSlash > 0 {
 							remotePath = args[0][:lastSlash]
 							pattern = args[0][lastSlash+1:]
 						} else {
-							// 根目录下的模式
 							remotePath = "/"
 							pattern = args[0][1:]
 						}
 					} else {
-						// 相对路径的模式
 						pattern = args[0]
 					}
 				} else {
-					// 没有通配符，是路径
 					remotePath = args[0]
 				}
 			}
@@ -293,9 +280,7 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 		log.Fatalf("❌ Failed to list: %v", err)
 	}
 
-	// 过滤文件（如果有模式）
 	if pattern != "" {
-		// 转换通配符为正则表达式
 		regexPattern := pattern
 		regexPattern = strings.ReplaceAll(regexPattern, ".", "\\.")
 		regexPattern = strings.ReplaceAll(regexPattern, "*", ".*")
@@ -307,7 +292,6 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 			log.Fatalf("❌ Invalid pattern: %v", err)
 		}
 
-		// 过滤文件
 		var filteredFiles []gowebdav.FileInfo
 		for _, file := range files {
 			if re.MatchString(file.Name()) {
@@ -317,46 +301,34 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 		files = filteredFiles
 	}
 
-	// 检查并处理当前目录
-	// 获取当前路径的最后一部分
 	currentDirName := path.Base(remotePath)
 	if currentDirName == "/" {
 		currentDirName = ""
 	}
 
-	// 遍历文件列表，将当前目录显示为 .
 	for i, file := range files {
 		if file.IsDir() {
-			// 去除目录名末尾的斜杠进行比较
 			dirName := strings.TrimSuffix(file.Name(), "/")
 			if dirName == currentDirName {
-				// 创建一个新的FileInfo，将名称改为 .
 				files[i] = gowebdav.NewFileInfo("./", file.Size(), file.Mode(), file.ModTime(), file.IsDir())
 			}
 		}
 	}
 
-	// 先按类型排序（目录在前，文件在后），然后按名称排序，最后按时间排序
-	// 首先按类型排序，并且确保 ./ 目录排在第一位
 	for i := range files {
 		for j := i + 1; j < len(files); j++ {
-			// 特殊处理：./ 目录始终排在第一位
 			if files[i].Name() == "./" {
-				// i 是 ./ 目录，已经在前面，不需要交换
 				continue
 			}
 			if files[j].Name() == "./" {
-				// j 是 ./ 目录，需要交换到前面
 				files[i], files[j] = files[j], files[i]
 				continue
 			}
-			// 目录在前，文件在后
 			if files[i].IsDir() != files[j].IsDir() {
 				if files[j].IsDir() {
 					files[i], files[j] = files[j], files[i]
 				}
 			} else {
-				// 同一类型内按名称排序
 				if files[i].Name() > files[j].Name() {
 					files[i], files[j] = files[j], files[i]
 				}
@@ -364,16 +336,12 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 		}
 	}
 
-	// 然后按时间排序
 	if sortByTime {
-		// 按修改时间排序，最新的文件先显示
 		for i := range files {
 			for j := i + 1; j < len(files); j++ {
-				// 跳过 ./ 目录的排序
 				if files[i].Name() == "./" || files[j].Name() == "./" {
 					continue
 				}
-				// 只在同一类型内排序
 				if files[i].IsDir() == files[j].IsDir() {
 					if files[i].ModTime().Before(files[j].ModTime()) {
 						files[i], files[j] = files[j], files[i]
@@ -383,10 +351,7 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 		}
 	}
 
-	// 反向排序
 	if reverse {
-		// 反转文件列表，但保持 ./ 目录在第一位
-		// 先找到 ./ 目录的位置
 		dotIndex := -1
 		for i, file := range files {
 			if file.Name() == "./" {
@@ -395,28 +360,22 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 			}
 		}
 
-		// 反转除 ./ 目录外的其他文件
 		if dotIndex != -1 {
-			// 反转前面的部分（如果有的话）
 			for i, j := 0, dotIndex-1; i < j; i, j = i+1, j-1 {
 				files[i], files[j] = files[j], files[i]
 			}
-			// 反转后面的部分
 			for i, j := dotIndex+1, len(files)-1; i < j; i, j = i+1, j-1 {
 				files[i], files[j] = files[j], files[i]
 			}
 		} else {
-			// 没有 ./ 目录，直接反转整个列表
 			for i, j := 0, len(files)-1; i < j; i, j = i+1, j-1 {
 				files[i], files[j] = files[j], files[i]
 			}
 		}
 	}
 
-	// 最后确保 ./ 目录排在第一位
 	for i, file := range files {
 		if file.Name() == "./" && i != 0 {
-			// 将 ./ 目录移动到第一位
 			for j := i; j > 0; j-- {
 				files[j], files[j-1] = files[j-1], files[j]
 			}
@@ -427,9 +386,7 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 	fmt.Println("Contents:")
 
 	if longFormat {
-		// 使用tablewriter进行格式化输出
 		data := [][]string{}
-		// 添加表头
 		data = append(data, []string{"Name", "Size", "Type", "Modified"})
 
 		for _, file := range files {
@@ -443,7 +400,6 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 				fileType = "file"
 				size = formatSize(file.Size())
 			}
-			// 添加数据行
 			data = append(data, []string{
 				name,
 				size,
@@ -452,13 +408,11 @@ func executeLS(ctx context.Context, client *gowebdav.Client, remotePath string, 
 			})
 		}
 
-		// 创建并渲染表格
 		table := tablewriter.NewWriter(os.Stdout)
 		table.Header(data[0])
 		table.Bulk(data[1:])
 		table.Render()
 	} else {
-		// 短格式列出
 		for _, file := range files {
 			fmt.Printf("%s\n", file.Name())
 		}
@@ -475,17 +429,14 @@ func printProgress(downloaded, total int64) {
 
 	percentage := float64(downloaded) / float64(total) * 100
 
-	// 清除当前行
 	fmt.Fprint(os.Stderr, "\r")
 
-	// 打印进度条
 	barLength := 50
 	filledLength := int(percentage / 100 * float64(barLength))
 	bar := strings.Repeat("=", filledLength) + strings.Repeat(" ", barLength-filledLength)
 
 	fmt.Fprintf(os.Stderr, "[%-50s] %.2f%% (%d/%d)", bar, percentage, downloaded, total)
 
-	// 如果完成，打印换行
 	if downloaded >= total {
 		fmt.Fprint(os.Stderr, "\n")
 	}
@@ -558,7 +509,28 @@ func executeCat(ctx context.Context, client *gowebdav.Client, remotePath string)
 		log.Fatalf("❌ Failed to read file: %v", err)
 	}
 
-	// 输出文件内容
+	ext := strings.ToLower(filepath.Ext(remotePath))
+
+	if ext == ".json" {
+		var data interface{}
+		if err := json.Unmarshal(content, &data); err == nil {
+			formatted, err := json.MarshalIndent(data, "", "  ")
+			if err == nil {
+				fmt.Println(string(formatted))
+				return
+			}
+		}
+	} else if ext == ".yaml" || ext == ".yml" {
+		var data interface{}
+		if err := yaml.Unmarshal(content, &data); err == nil {
+			formatted, err := yaml.Marshal(data)
+			if err == nil {
+				fmt.Println(string(formatted))
+				return
+			}
+		}
+	}
+
 	fmt.Println(string(content))
 }
 
