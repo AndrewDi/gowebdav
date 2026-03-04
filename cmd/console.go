@@ -290,11 +290,9 @@ func executeCommand(input string) error {
 	case "pwd":
 		return executePwd()
 	case "ll":
-		args := []string{"ls", "-lrt"}
-		if currentPath != "/" {
-			args = append(args, currentPath)
-		}
-		return runCobraCommand(args)
+		args := []string{"ls", "-lrt", currentPath}
+		rootCmd.SetArgs(args)
+		return rootCmd.Execute()
 	default:
 		return runCobraCommand(parts)
 	}
