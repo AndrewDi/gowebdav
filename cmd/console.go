@@ -290,8 +290,11 @@ func executeCommand(input string) error {
 	case "pwd":
 		return executePwd()
 	case "ll":
-		adjustedArgs := adjustPathForCommand([]string{"ll", "-lrt"})
-		return runCobraCommand(adjustedArgs)
+		args := []string{"ls", "-lrt"}
+		if currentPath != "/" {
+			args = append(args, currentPath)
+		}
+		return runCobraCommand(args)
 	default:
 		return runCobraCommand(parts)
 	}
@@ -415,7 +418,7 @@ func adjustPathForCommand(args []string) []string {
 	command := strings.ToLower(args[0])
 
 	switch command {
-	case "ls", "ll":
+	case "ls":
 		args = adjustLsPath(args)
 	case "cat", "vim", "mkdir", "rm", "rmdir":
 		if len(args) > 1 {
@@ -436,14 +439,6 @@ func adjustPathForCommand(args []string) []string {
 
 func adjustLsPath(args []string) []string {
 	pathIndex := -1
-
-	if len(args) > 0 && args[0] == "ll" {
-		args = append(args, "")
-		copy(args[2:], args[1:])
-		args[1] = "-lrt"
-		args[2] = currentPath
-		return args
-	}
 
 	for i := 1; i < len(args); i++ {
 		if !strings.HasPrefix(args[i], "-") {
