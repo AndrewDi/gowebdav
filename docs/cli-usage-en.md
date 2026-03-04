@@ -126,6 +126,7 @@ webdav-cli console --endpoint http://192.168.1.5:5005 --username webcli --passwo
 - `clear` - Clear the screen
 - `cd [path]` - Change directory (cd, cd .., cd /path)
 - `pwd` - Print working directory
+- `ll` - List directory contents with long format, sorted by time (alias for `ls -lrt`)
 
 **Usage Example**:
 ```
@@ -135,8 +136,10 @@ Type 'help' for available commands, 'exit' or 'quit' to exit.
 Use Tab for auto-completion.
 
 webdav> ls
+webdav> ll
 webdav> cd /documents
 webdav:/documents> ls
+webdav:/documents> ll
 webdav:/documents> pwd
 /documents
 webdav:/documents> exit
@@ -146,6 +149,29 @@ webdav:/documents> exit
 - **Tab Completion**: Press Tab to auto-complete commands and file paths
 - **Directory Navigation**: Use cd and pwd commands to navigate directories
 - **Command History**: Use up/down arrow keys to browse command history
+
+### 7. cat - Display File Content (with Format Support)
+
+**Function**: Display file content from WebDAV server, with automatic formatting for JSON and YAML files.
+
+**Parameters**:
+- `path`: File path
+
+**Example**:
+```bash
+# View plain text file
+webdav-cli cat /document.txt
+
+# View JSON file (auto-formatted)
+webdav-cli cat /config.json
+
+# View YAML file (auto-formatted)
+webdav-cli cat /config.yaml
+```
+
+**Format Support**:
+- `.json` files are automatically formatted with indentation
+- `.yaml` / `.yml` files are automatically formatted with proper indentation
 
 ## Complete Example
 

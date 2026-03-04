@@ -126,6 +126,7 @@ webdav-cli console --endpoint http://192.168.1.5:5005 --username webcli --passwo
 - `clear` - 清空屏幕
 - `cd [路径]` - 切换目录（cd, cd .., cd /path）
 - `pwd` - 显示当前目录
+- `ll` - 以长格式列出目录内容，按时间排序（等同于 `ls -lrt`）
 
 **使用示例**：
 ```
@@ -135,8 +136,10 @@ Type 'help' for available commands, 'exit' or 'quit' to exit.
 Use Tab for auto-completion.
 
 webdav> ls
+webdav> ll
 webdav> cd /documents
 webdav:/documents> ls
+webdav:/documents> ll
 webdav:/documents> pwd
 /documents
 webdav:/documents> exit
@@ -146,6 +149,29 @@ webdav:/documents> exit
 - **Tab 补全**：按 Tab 键自动补全命令和文件路径
 - **目录导航**：使用 cd 和 pwd 命令切换目录
 - **命令历史**：使用上下箭头键浏览命令历史
+
+### 7. cat - 查看文件内容（支持格式化）
+
+**功能**：查看 WebDAV 服务器上的文件内容，自动格式化 JSON 和 YAML 文件。
+
+**参数**：
+- `path`：文件路径
+
+**示例**：
+```bash
+# 查看普通文件
+webdav-cli cat /document.txt
+
+# 查看 JSON 文件（自动格式化）
+webdav-cli cat /config.json
+
+# 查看 YAML 文件（自动格式化）
+webdav-cli cat /config.yaml
+```
+
+**格式化支持**：
+- `.json` 文件自动格式化为带缩进的 JSON
+- `.yaml` / `.yml` 文件自动格式化为带缩进的 YAML
 
 ## 完整示例
 

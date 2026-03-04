@@ -247,6 +247,7 @@ webdav-cli console
 - `clear` - Clear the screen
 - `cd [path]` - Change directory (cd, cd .., cd /path)
 - `pwd` - Print working directory
+- `ll` - List directory contents with long format, sorted by time (alias for `ls -lrt`)
 
 **Example:**
 ```
@@ -256,11 +257,25 @@ Type 'help' for available commands, 'exit' or 'quit' to exit.
 Use Tab for auto-completion.
 
 webdav> ls
+webdav> ll
 webdav> cd /documents
 webdav:/documents> ls
+webdav:/documents> ll
 webdav:/documents> pwd
 /documents
 webdav:/documents> exit
+```
+
+#### Cat Command with Format Support
+
+The `cat` command automatically formats JSON and YAML files:
+
+```bash
+# JSON files are formatted with indentation
+webdav-cli cat /config.json
+
+# YAML files are formatted with proper indentation
+webdav-cli cat /config.yaml
 ```
 
 ## Library Usage
